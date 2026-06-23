@@ -1,0 +1,17 @@
+﻿@model IdentityUser
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+@if (User.Identity.IsAuthenticated)
+{
+    <h2>Witaj!</h2>
+
+    <p><b>Email:</b> @Model.Email</p>
+    <p><b>User ID:</b> @Model.Id</p>
+}
+else
+{
+    <h2>Witaj na stronie PrintUMK</h2>
+    <p>Zaloguj się, aby zobaczyć swoje dane.</p>
+}

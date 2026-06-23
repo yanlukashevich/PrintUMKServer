@@ -1,0 +1,778 @@
+﻿@{
+    ViewData["Title"] = "Drukowanie";
+}
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    .print-container {
+        max-width: 1200px;
+        margin: 40px auto;
+        padding: 0 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.1em;
+        }
+
+    .main-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-bottom: 30px;
+    }
+
+    .card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+        padding: 30px;
+    }
+
+        .card h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+    .upload-area {
+        border: 2px dashed #3498db;
+        border-radius: 8px;
+        padding: 40px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: #f8f9fa;
+    }
+
+        .upload-area:hover {
+            border-color: #2980b9;
+            background: #e3f2fd;
+        }
+
+        .upload-area.dragover {
+            background: #bbdefb;
+            border-color: #1976d2;
+        }
+
+    .upload-icon {
+        font-size: 48px;
+        color: #3498db;
+        margin-bottom: 15px;
+    }
+
+    .file-input {
+        display: none;
+    }
+
+    .file-info {
+        display: none;
+        margin-top: 20px;
+        padding: 15px;
+        background: #e8f5e9;
+        border-radius: 8px;
+        border-left: 4px solid #4caf50;
+    }
+
+        .file-info.show {
+            display: block;
+        }
+
+    .file-preview {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+        .file-preview iframe {
+            width: 100%;
+            height: 400px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        .file-preview img {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .form-group select,
+        .form-group input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+            .form-group select:focus,
+            .form-group input:focus {
+                outline: none;
+                border-color: #3498db;
+            }
+
+    .printer-card {
+        padding: 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+        .printer-card:hover {
+            border-color: #3498db;
+            background: #f8f9fa;
+        }
+
+        .printer-card.selected {
+            border-color: #3498db;
+            background: #e3f2fd;
+        }
+
+    .printer-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .printer-location {
+        font-size: 0.9em;
+        color: #7f8c8d;
+    }
+
+    .options-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+
+    .option-button {
+        padding: 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        background: white;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-align: center;
+    }
+
+        .option-button:hover {
+            border-color: #3498db;
+        }
+
+        .option-button.active {
+            border-color: #3498db;
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+    .cost-summary {
+        background: #fff3cd;
+        border: 2px solid #ffc107;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+    }
+
+    .cost-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        color: #856404;
+    }
+
+    .cost-total {
+        font-size: 1.3em;
+        font-weight: bold;
+        padding-top: 10px;
+        border-top: 2px solid #ffc107;
+    }
+
+    .submit-button {
+        width: 100%;
+        padding: 18px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 18px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.3s;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+        .submit-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .submit-button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+    .status-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .status-modal.show {
+            display: flex;
+        }
+
+    .status-content {
+        background: white;
+        border-radius: 12px;
+        padding: 40px;
+        max-width: 500px;
+        text-align: center;
+        animation: slideIn 0.3s ease;
+    }
+
+    @@keyframes slideIn {
+        from {
+            transform: translateY(-50px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .status-icon {
+        font-size: 64px;
+        margin-bottom: 20px;
+    }
+
+        .status-icon.success {
+            color: #4caf50;
+        }
+
+        .status-icon.processing {
+            color: #ff9800;
+            animation: spin 2s linear infinite;
+        }
+
+    @@keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: #e0e0e0;
+        border-radius: 4px;
+        overflow: hidden;
+        margin: 20px 0;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        width: 0%;
+        transition: width 0.3s ease;
+    }
+
+    .alert {
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .alert-error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    @@media (max-width: 768px) {
+        .main-content {
+            grid-template-columns: 1fr;
+        }
+
+        .options-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+@if (ViewBag.Message != null)
+{
+    <div class="alert alert-success">✓ @ViewBag.Message</div>
+}
+
+<div class="print-container">
+    <div class="header">
+        <h1>🖨️ System Drukowania UMK</h1>
+        <p>Wydrukuj swoje dokumenty szybko i wygodnie</p>
+    </div>
+
+    <form id="printForm" asp-action="Upload" method="post" enctype="multipart/form-data">
+        <div class="main-content">
+            <!-- Lewa kolumna - Upload i Preview -->
+            <div class="card">
+                <h2>📄 Twój dokument</h2>
+
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">☁️</div>
+                    <h3>Przeciągnij plik tutaj</h3>
+                    <p>lub kliknij, aby wybrać</p>
+                    <p style="color: #7f8c8d; font-size: 0.9em; margin-top: 10px;">
+                        Obsługiwane formaty: PDF, DOC, DOCX, JPG, PNG
+                    </p>
+                    <input type="file" name="file" id="fileInput" class="file-input" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" required />
+                </div>
+
+                <div class="file-info" id="fileInfo">
+                    <strong>Wybrany plik:</strong>
+                    <div id="fileName"></div>
+                    <div id="fileSize" style="color: #7f8c8d; font-size: 0.9em;"></div>
+                </div>
+
+                <div class="file-preview" id="filePreview"></div>
+            </div>
+
+            <!-- Prawa kolumna - Opcje druku -->
+            <div class="card">
+                <h2>⚙️ Opcje druku</h2>
+
+                <div class="form-group">
+                    <label>Wybierz drukarkę</label>
+                    <select name="printerName" id="printerSelect" required>
+                        <option value="">-- wybierz drukarkę --</option>
+                        <option value="Akademik3" data-location="Akademik nr 3, parter" data-color="true" data-duplex="true">
+                            Akademik 3 - ul. Gagarina
+                        </option>
+                        <option value="WydzialFizyki" data-location="Wydział Fizyki, pokój 101" data-color="false" data-duplex="true">
+                            Wydział Fizyki
+                        </option>
+                        <option value="BibliotekaCentralna" data-location="Biblioteka Główna UMK" data-color="true" data-duplex="true">
+                            Biblioteka Centralna
+                        </option>
+                    </select>
+                    <div id="printerDetails" style="margin-top: 10px; color: #7f8c8d; font-size: 0.9em;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Liczba kopii</label>
+                    <input type="number" id="copies" name="copies" value="1" min="1" max="20" />
+                </div>
+
+                <div class="form-group">
+                    <label>Kolor</label>
+                    <div class="options-grid">
+                        <div class="option-button active" data-option="color" data-value="bw">
+                            🖤 Czarno-biały<br />
+                            <small>0.20 zł/strona</small>
+                        </div>
+                        <div class="option-button" data-option="color" data-value="color">
+                            🌈 Kolorowy<br />
+                            <small>0.80 zł/strona</small>
+                        </div>
+                    </div>
+                    <input type="hidden" name="color" id="colorInput" value="bw" />
+                </div>
+
+                <div class="form-group">
+                    <label>Strony</label>
+                    <div class="options-grid">
+                        <div class="option-button active" data-option="duplex" data-value="single">
+                            📄 Jednostronnie
+                        </div>
+                        <div class="option-button" data-option="duplex" data-value="duplex">
+                            📑 Dwustronnie
+                        </div>
+                    </div>
+                    <input type="hidden" name="duplex" id="duplexInput" value="single" />
+                </div>
+
+                <div class="form-group">
+                    <label>Orientacja</label>
+                    <div class="options-grid">
+                        <div class="option-button active" data-option="orientation" data-value="portrait">
+                            📱 Pionowa
+                        </div>
+                        <div class="option-button" data-option="orientation" data-value="landscape">
+                            📺 Pozioma
+                        </div>
+                    </div>
+                    <input type="hidden" name="orientation" id="orientationInput" value="portrait" />
+                </div>
+
+                <div class="cost-summary">
+                    <div class="cost-row">
+                        <span>Liczba stron:</span>
+                        <span id="pageCount">--</span>
+                    </div>
+                    <div class="cost-row">
+                        <span>Koszt za stronę:</span>
+                        <span id="costPerPage">0.20 zł</span>
+                    </div>
+                    <div class="cost-row">
+                        <span>Liczba kopii:</span>
+                        <span id="copiesDisplay">1</span>
+                    </div>
+                    <div class="cost-row cost-total">
+                        <span>Szacowany koszt:</span>
+                        <span id="totalCost">--</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-button" id="submitBtn" disabled>
+                    🚀 Wyślij do druku
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- PDF.js dla dokładnego liczenia stron -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+<!-- Modal statusu -->
+<div class="status-modal" id="statusModal">
+    <div class="status-content">
+        <div class="status-icon processing" id="statusIcon">⚙️</div>
+        <h2 id="statusTitle">Przesyłanie pliku...</h2>
+        <p id="statusMessage">Proszę czekać</p>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div id="statusDetails"></div>
+    </div>
+</div>
+
+<script>
+    // Konfiguracja PDF.js
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const fileInfo = document.getElementById('fileInfo');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+    const filePreview = document.getElementById('filePreview');
+    const submitBtn = document.getElementById('submitBtn');
+    const printerSelect = document.getElementById('printerSelect');
+    const printerDetails = document.getElementById('printerDetails');
+    const copiesInput = document.getElementById('copies');
+    const copiesDisplay = document.getElementById('copiesDisplay');
+    const pageCount = document.getElementById('pageCount');
+    const costPerPage = document.getElementById('costPerPage');
+    const totalCost = document.getElementById('totalCost');
+    const printForm = document.getElementById('printForm');
+    const statusModal = document.getElementById('statusModal');
+
+    let selectedFile = null;
+    let estimatedPages = 1;
+
+    // ============================================
+    // DOKŁADNE LICZENIE STRON z PDF.js
+    // ============================================
+    async function getExactPageCount(file) {
+        // Dla obrazów - zawsze 1 strona
+        if (file.type.startsWith('image/')) {
+            return 1;
+        }
+
+        // Dla PDF - użyj PDF.js do dokładnego zliczenia
+        if (file.type === 'application/pdf') {
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                return pdf.numPages; // DOKŁADNA liczba stron!
+            } catch (error) {
+                console.error('Błąd czytania PDF:', error);
+                // Fallback - szacowanie jeśli PDF.js się nie uda
+                return Math.max(1, Math.ceil(file.size / 50000));
+            }
+        }
+
+        // Dla innych formatów - szacowanie
+        const avgPageSize = 50000;
+        return Math.max(1, Math.ceil(file.size / avgPageSize));
+    }
+
+    // Upload area click
+    uploadArea.addEventListener('click', () => fileInput.click());
+
+    // Drag and drop
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            fileInput.files = files;
+            handleFileSelect(files[0]);
+        }
+    });
+
+    // File input change
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            handleFileSelect(e.target.files[0]);
+        }
+    });
+
+    function handleFileSelect(file) {
+        selectedFile = file;
+
+        // Pokaż info o pliku
+        fileName.textContent = file.name;
+        fileSize.textContent = formatFileSize(file.size);
+        fileInfo.classList.add('show');
+
+        // Podgląd pliku
+        showPreview(file);
+
+        // Policz dokładną liczbę stron
+        countPagesAsync(file);
+
+        // Przelicz koszt
+        calculateCost();
+    }
+
+    // Asynchroniczne liczenie stron z feedback dla użytkownika
+    async function countPagesAsync(file) {
+        // Pokaż że liczymy
+        pageCount.textContent = '⏳ Liczenie...';
+        submitBtn.disabled = true;
+        submitBtn.textContent = '⏳ Analizowanie pliku...';
+
+        try {
+            // Dokładne zliczenie stron
+            estimatedPages = await getExactPageCount(file);
+
+            // Pokaż wynik
+            if (file.type === 'application/pdf') {
+                pageCount.textContent = estimatedPages + ' ✓';
+            } else if (file.type.startsWith('image/')) {
+                pageCount.textContent = '1 (obraz)';
+            } else {
+                pageCount.textContent = estimatedPages + ' (szacowane)';
+            }
+
+            // Aktywuj przycisk
+            submitBtn.disabled = false;
+            submitBtn.textContent = '🚀 Wyślij do druku';
+
+        } catch (error) {
+            console.error('Błąd liczenia stron:', error);
+            pageCount.textContent = '? (błąd analizy)';
+            estimatedPages = 1;
+
+            submitBtn.disabled = false;
+            submitBtn.textContent = '🚀 Wyślij do druku';
+        }
+
+        // Zaktualizuj koszt
+        calculateCost();
+    }
+
+    function showPreview(file) {
+        filePreview.innerHTML = '';
+        const fileType = file.type;
+
+        if (fileType === 'application/pdf') {
+            const url = URL.createObjectURL(file);
+            filePreview.innerHTML = `<iframe src="${url}#toolbar=0"></iframe>`;
+        } else if (fileType.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                filePreview.innerHTML = `<img src="${e.target.result}" alt="Podgląd" />`;
+            };
+            reader.readAsDataURL(file);
+        } else {
+            filePreview.innerHTML = '<p>Podgląd niedostępny dla tego typu pliku</p>';
+        }
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    }
+
+    // Opcje druku - przyciski
+    document.querySelectorAll('.option-button').forEach(button => {
+        button.addEventListener('click', function() {
+            const option = this.dataset.option;
+            const value = this.dataset.value;
+
+            // Usuń active z innych przycisków w tej samej grupie
+            document.querySelectorAll(`[data-option="${option}"]`).forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Dodaj active do klikniętego
+            this.classList.add('active');
+
+            // Ustaw wartość w hidden input
+            document.getElementById(option + 'Input').value = value;
+
+            // Przelicz koszt jeśli to opcja koloru
+            if (option === 'color') {
+                calculateCost();
+            }
+        });
+    });
+
+    // Drukarka - pokaż szczegóły
+    printerSelect.addEventListener('change', function() {
+        const selected = this.options[this.selectedIndex];
+        if (selected.value) {
+            const location = selected.dataset.location;
+            const color = selected.dataset.color === 'true';
+            const duplex = selected.dataset.duplex === 'true';
+
+            printerDetails.innerHTML = `
+                📍 ${location}<br/>
+                ${color ? '✓ Druk kolorowy' : '✗ Tylko czarno-biały'} |
+                ${duplex ? '✓ Druk dwustronny' : '✗ Tylko jednostronny'}
+            `;
+        } else {
+            printerDetails.innerHTML = '';
+        }
+    });
+
+    // Liczba kopii
+    copiesInput.addEventListener('input', function() {
+        copiesDisplay.textContent = this.value;
+        calculateCost();
+    });
+
+    function calculateCost() {
+        const colorOption = document.getElementById('colorInput').value;
+        const copies = parseInt(copiesInput.value) || 1;
+        const pricePerPage = colorOption === 'color' ? 0.80 : 0.20;
+
+        costPerPage.textContent = pricePerPage.toFixed(2) + ' zł';
+
+        if (estimatedPages > 0) {
+            const total = estimatedPages * pricePerPage * copies;
+            totalCost.textContent = total.toFixed(2) + ' zł';
+        }
+    }
+
+    // Submit formularza
+    printForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Pokaż modal
+        statusModal.classList.add('show');
+
+        // Symuluj progress
+        let progress = 0;
+        const progressFill = document.getElementById('progressFill');
+        const interval = setInterval(() => {
+            progress += 10;
+            progressFill.style.width = progress + '%';
+
+            if (progress >= 90) {
+                clearInterval(interval);
+            }
+        }, 200);
+
+        // Wyślij formularz
+        const formData = new FormData(this);
+
+        fetch(this.action, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(data => {
+            clearInterval(interval);
+            progressFill.style.width = '100%';
+
+            setTimeout(() => {
+                document.getElementById('statusIcon').className = 'status-icon success';
+                document.getElementById('statusIcon').textContent = '✓';
+                document.getElementById('statusTitle').textContent = 'Sukces!';
+                document.getElementById('statusMessage').textContent = 'Twoje zadanie drukowania zostało przyjęte';
+                document.getElementById('statusDetails').innerHTML = `
+                    <p style="margin-top: 20px;">Możesz odebrać wydruk za około 5-10 minut</p>
+                    <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 30px; background: #4caf50; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                        OK
+                    </button>
+                `;
+            }, 500);
+        })
+        .catch(error => {
+            clearInterval(interval);
+            document.getElementById('statusIcon').className = 'status-icon';
+            document.getElementById('statusIcon').textContent = '✗';
+            document.getElementById('statusIcon').style.color = '#f44336';
+            document.getElementById('statusTitle').textContent = 'Błąd';
+            document.getElementById('statusMessage').textContent = 'Nie udało się wysłać zadania drukowania';
+        });
+    });
+</script>
